@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\SettingsController;
@@ -39,7 +39,11 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/notification-status', [NotificationController::class, 'status']);
 
     Route::middleware('admin')->prefix('admin')->group(function () {
-        //
+        Route::post('/add-product',[ProductController::class,'addProduct']);
+        Route::get('/get-products',[ProductController::class,'getProducts']);
+        Route::patch('/edit-product/{id?}',[ProductController::class,'editProduct']);
+        Route::get('/view-product/{id?}',[ProductController::class,'viewProduct']);
+        Route::delete('/delete-product/{id?}',[ProductController::class,'deleteProduct']);
     });
 
     Route::middleware('user')->prefix('user')->group(function () {

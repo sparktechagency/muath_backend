@@ -246,8 +246,7 @@ class AuthController extends Controller
             return $this->sendError('Something went wrong.' . $e->getMessage(), [], 500);
         }
     }
-
-     public function changePassword(Request $request)
+    public function changePassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'password' => 'required|string|min:8|confirmed'
@@ -321,7 +320,6 @@ class AuthController extends Controller
             ]);
         }
     }
-
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -411,5 +409,4 @@ class AuthController extends Controller
             return $this->sendError('Something went wrong.' . $e->getMessage(), [], 500);
         }
     }
-
 }
