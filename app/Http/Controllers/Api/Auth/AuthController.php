@@ -238,49 +238,52 @@ class AuthController extends Controller
                 Log::error($e->getMessage());
             }
 
-            return response()->json([
-                'status' => true,
-                'message' => 'OTP resend to your email'
-            ], 200);
+            return $this->sendResponse([],'OTP resend to your email.');
+            
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.' . $e->getMessage(), [], 500);
         }
     }
     public function changePassword(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'password' => 'required|string|min:8|confirmed'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => $validator->errors(),
-            ], 422);
-        }
-
-        $user = User::where('id', Auth::id())->first();
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Unauthenticated',
-            ], 404);
-        }
-
-        if ($user->status == 'Active') {
-            $user->password = Hash::make($request->password);
-            $user->save();
-            return response()->json([
-                'status' => true,
-                'message' => 'Password change successfully!',
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string|min:8|confirmed'
             ]);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Unauthorized user'
-            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors(),
+                ], 422);
+            }
+
+            $user = User::where('id', Auth::id())->first();
+
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthenticated',
+                ], 404);
+            }
+
+            if ($user->status == 'Active') {
+                $user->password = Hash::make($request->password);
+                $user->save();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Password change successfully!',
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized user'
+                ]);
+            }
+        } catch (Exception $e) {
+            return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
+
     }
     public function updatePassword(Request $request)
     {

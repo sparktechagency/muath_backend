@@ -15,6 +15,7 @@ class ProductController extends Controller
     {
         try {
             $validated = $request->validate([
+                'category' => 'required|string|max:255',
                 'name' => 'required|string|max:255',
                 'price' => 'required|numeric|min:0',
                 'description' => 'required|string',
@@ -30,15 +31,15 @@ class ProductController extends Controller
             }
 
             $product = Product::create([
+                'category' => $validated['category'],
                 'name' => $validated['name'],
                 'price' => $validated['price'],
                 'description' => $validated['description'],
                 'images' => json_encode($imagePaths),
             ]);
-
-            return response()->json(['status' => true, 'data' => $product], 201);
+            return $this->sendResponse($product, 'Product added successfully.', true, 201);
         } catch (Exception $e) {
-            return $this->sendError('Something went wrong.', $e->getMessage(), 404);
+            return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
     public function getProducts(Request $request)
@@ -50,6 +51,11 @@ class ProductController extends Controller
                 $search = $request->search;
                 $query->where('name', 'like', "%$search%")
                     ->orWhere('description', 'like', "%$search%");
+            }
+
+            if ($request->has('filter') && !empty($request->filter)) {
+                $filter = $request->filter;
+                $query->where('category', $filter);
             }
 
             $products = $query->latest()->paginate(10);
