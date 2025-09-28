@@ -1,15 +1,22 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\ProductController;
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\CloverController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\StaticPageController;
 use App\Http\Controllers\Api\User\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+
+Route::post('/create-payment', [CloverController::class, 'createPayment']);
+Route::get('/transaction/{transactionId}', [CloverController::class, 'getTransaction']);
+
 
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -45,6 +52,10 @@ Route::middleware('auth:api')->group(function () {
     // dashboard
     Route::get('/basic-info', [DashboardController::class, 'basicInfo']);
     
+    // banner 
+    Route::post('/banner-update',[BannerController::class,'bannerUpdate']);
+    Route::get('/get-banner',[BannerController::class,'getBanner']);
+
     // product
     Route::post('/add-product', [ProductController::class, 'addProduct']);
     Route::get('/get-products', [ProductController::class, 'getProducts']);
@@ -60,9 +71,9 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/delete-category/{id?}', [CategoryController::class, 'deleteCategory']);
 
     // setting
-    Route::get('/get-reports', [SettingsController::class, 'getReports']);
-    Route::get('/view-report/{id}', [SettingsController::class, 'viewReport']);
-    Route::delete('/delete-report/{id}', [SettingsController::class, 'deleteReport']);
+    Route::get('/get-feedbacks', [SettingsController::class, 'getFeedbacks']);
+    Route::get('/view-feedback/{id}', [SettingsController::class, 'viewFeedback']);
+    Route::delete('/delete-feedback/{id}', [SettingsController::class, 'deleteFeedback']);
   });
 
   Route::middleware('user')->prefix('user')->group(function () {
@@ -73,6 +84,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/my-cart', [UserController::class, 'myCart']);
     Route::delete('/clear-my-cart', [UserController::class, 'clearMyCart']);
     Route::delete('/remove-cart-product/{id?}', [UserController::class, 'removeCartProduct']);
-    Route::post('/create-report', [UserController::class, 'createReport']);
+    Route::post('/send-feedback', [UserController::class, 'sendFeedback']);
+    Route::patch('/count-up', [UserController::class, 'countUp']);
+    Route::patch('/count-down', [UserController::class, 'countDown']);
   });
 });

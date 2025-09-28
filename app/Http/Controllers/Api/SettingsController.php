@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class SettingsController extends Controller
 {
-    public function getReports(Request $request)
+    public function getFeedbacks(Request $request)
     {
         $query = $request->input('search');
 
@@ -22,7 +22,7 @@ class SettingsController extends Controller
         return response()->json(['status' => true, 'data' => $reports]);
     }
 
-    public function viewReport($id)
+    public function viewFeedback($id)
     {
         $report = Report::find($id);
 
@@ -33,7 +33,7 @@ class SettingsController extends Controller
         return response()->json(['status' => true, 'data' => $report]);
     }
 
-    public function deleteReport($id)
+    public function deleteFeedback($id)
     {
         $report = Report::find($id);
 

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d46537a24eff9bb87f645ae19c244518",
+    "content-hash": "8e0edffbde38bdb8c22179bf3e5afd77",
     "packages": [
         {
             "name": "brick/math",
@@ -134,6 +134,38 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
+        },
+        {
+            "name": "clever/clever-php",
+            "version": "v0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Clever/clever-php.git",
+                "reference": "de5e6b50f58aa8f1de99793c23bf520f962bd74e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Clever/clever-php/zipball/de5e6b50f58aa8f1de99793c23bf520f962bd74e",
+                "reference": "de5e6b50f58aa8f1de99793c23bf520f962bd74e",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "lib/Clever.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "description": "Clever PHP library",
+            "homepage": "http://getclever.com/",
+            "support": {
+                "issues": "https://github.com/Clever/clever-php/issues",
+                "source": "https://github.com/Clever/clever-php/tree/v0.2.0"
+            },
+            "time": "2014-04-24T22:14:54+00:00"
         },
         {
             "name": "dflydev/dot-access-data",

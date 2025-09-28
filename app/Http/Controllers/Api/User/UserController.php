@@ -31,7 +31,11 @@ class UserController extends Controller
             $products = $query->latest()->paginate(10);
 
             foreach ($products as $product) {
-                $product->images = json_decode($product->images);
+
+                $product->images = array_map(function ($image) {
+                    return asset($image);
+                }, json_decode($product->images, true));
+                $product->packs = !empty($product->packs) ? json_decode($product->packs, true) : [];
             }
 
             return $this->sendResponse($products, 'Get products.');
@@ -46,7 +50,11 @@ class UserController extends Controller
             if (!$product) {
                 return $this->sendError('Product not found!.', []);
             }
-            $product->images = json_decode($product->images);
+            $product->images = array_map(function ($image) {
+                return asset($image);
+            }, json_decode($product->images, true));
+            $product->packs = !empty($product->packs) ? json_decode($product->packs, true) : [];
+
 
             $product->related = Product::where('category', $product->category)
                 ->where('id', '!=', $product->id)
@@ -107,24 +115,53 @@ class UserController extends Controller
 
     public function removeCartProduct($id)
     {
-        
+
         Cart::where('id', $id)->delete();
         return response()->json(['status' => true, 'message' => 'Product removed from cart.']);
     }
 
-    public function createReport(Request $request)
+    public function sendFeedback(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required|string',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255',
+            'feedback' => 'required|string|max:255'
         ]);
 
         $report = Report::create([
             'user_id' => Auth::id(),
-            'title' => $validated['title'],
-            'body' => $validated['body'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'feedback' => $validated['feedback'],
         ]);
 
-        return response()->json(['status' => true, 'message' => 'Report created successfully', 'data' => $report]);
+        return response()->json(['status' => true, 'message' => 'Send feedback to admin.', 'data' => $report]);
     }
+
+    public function countUp(Request $request)
+    {
+        $cart_item = Cart::where('id', $request->cart_id)->first();
+
+        if ($cart_item) {
+            if ($cart_item->quantity < 10) {
+                $cart_item->increment('quantity', 1);
+                $cart_item->save();
+            }
+        }
+        return response()->json($cart_item);
+    }
+
+    public function countDown(Request $request)
+    {
+        $cart_item = Cart::where('id', $request->cart_id)->first();
+
+        if ($cart_item) {
+            if ($cart_item->quantity > 1) {
+                $cart_item->decrement('quantity', 1);
+                $cart_item->save();
+            }
+        }
+        return response()->json($cart_item);
+    }
+
 }

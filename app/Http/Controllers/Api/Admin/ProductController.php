@@ -21,6 +21,8 @@ class ProductController extends Controller
                 'description' => 'required|string',
                 'images' => 'required|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:20480', // 20 MB
+                'packs' => 'nullable',
+                'additional_description' => 'nullable|string',
             ]);
 
             $imagePaths = [];
@@ -36,12 +38,15 @@ class ProductController extends Controller
                 'price' => $validated['price'],
                 'description' => $validated['description'],
                 'images' => json_encode($imagePaths),
+                'packs' => $request->packs,
+                'additional_description' => $validated['additional_description'],
             ]);
             return $this->sendResponse($product, 'Product added successfully.', true, 201);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
+
     public function getProducts(Request $request)
     {
         try {
@@ -49,8 +54,10 @@ class ProductController extends Controller
 
             if ($request->has('search') && !empty($request->search)) {
                 $search = $request->search;
-                $query->where('name', 'like', "%$search%")
-                    ->orWhere('description', 'like', "%$search%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('description', 'like', "%$search%");
+                });
             }
 
             if ($request->has('filter') && !empty($request->filter)) {
@@ -61,14 +68,18 @@ class ProductController extends Controller
             $products = $query->latest()->paginate(10);
 
             foreach ($products as $product) {
-                $product->images = json_decode($product->images);
-            }
 
+                $product->images = array_map(function ($image) {
+                    return asset($image);
+                }, json_decode($product->images, true));
+                $product->packs = !empty($product->packs) ? json_decode($product->packs, true) : [];
+            }
             return $this->sendResponse($products, 'Get products.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
+
     public function editProduct(Request $request, $id)
     {
         try {
@@ -118,7 +129,11 @@ class ProductController extends Controller
             if (!$product) {
                 return $this->sendError('Product not found!.', []);
             }
-            $product->images = json_decode($product->images);
+           
+            $product->images = array_map(function ($image) {
+                return asset($image);
+            }, json_decode($product->images, true));
+            $product->packs = !empty($product->packs) ? json_decode($product->packs, true) : [];
             return $this->sendResponse($product, 'View product.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
@@ -138,8 +153,4 @@ class ProductController extends Controller
         }
     }
 }
-
-
-
-
 
