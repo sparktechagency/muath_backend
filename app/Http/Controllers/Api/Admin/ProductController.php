@@ -8,13 +8,14 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
     public function addProduct(Request $request)
     {
         try {
-            $validated = $request->validate([
+            $validator = Validator::make($request->all(), [
                 'category' => 'required|string|max:255',
                 'name' => 'required|string|max:255',
                 'price' => 'required|numeric|min:0',
@@ -25,6 +26,14 @@ class ProductController extends Controller
                 'additional_description' => 'nullable|string',
             ]);
 
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()
+                ], 422);
+            }
+
+
             $imagePaths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
@@ -33,13 +42,13 @@ class ProductController extends Controller
             }
 
             $product = Product::create([
-                'category' => $validated['category'],
-                'name' => $validated['name'],
-                'price' => $validated['price'],
-                'description' => $validated['description'],
+                'category' => $request->category,
+                'name' => $request->name,
+                'price' => $request->price,
+                'description' => $request->description,
                 'images' => json_encode($imagePaths),
                 'packs' => $request->packs,
-                'additional_description' => $validated['additional_description'],
+                'additional_description' => $request->additional_description,
             ]);
             return $this->sendResponse($product, 'Product added successfully.', true, 201);
         } catch (Exception $e) {
@@ -79,7 +88,6 @@ class ProductController extends Controller
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
-
     public function editProduct(Request $request, $id)
     {
         try {
@@ -129,7 +137,7 @@ class ProductController extends Controller
             if (!$product) {
                 return $this->sendError('Product not found!.', []);
             }
-           
+
             $product->images = array_map(function ($image) {
                 return asset($image);
             }, json_decode($product->images, true));

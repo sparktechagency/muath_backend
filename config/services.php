@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'clover' => [
+        'api_key' => env('CLOVER_API_KEY'),
+        'merchant_id' => env('CLOVER_MERCHANT_ID'),
+        'base_url' => env('CLOVER_BASE_URL', 'https://apisandbox.dev.clover.com'),
+    ],
 
 ];
