@@ -326,75 +326,75 @@ class CloverController extends Controller
 
 
     public function createCheckout(Request $request)
-{
-    $orders = is_string($request->orders) ? json_decode($request->orders, true) : $request->orders;
+    {
+        $orders = is_string($request->orders) ? json_decode($request->orders, true) : $request->orders;
 
-    if (!is_array($orders)) {
-        return response()->json(['error' => 'Invalid orders format'], 400);
-    }
+        if (!is_array($orders)) {
+            return response()->json(['error' => 'Invalid orders format'], 400);
+        }
 
-    $arr = [];
-    $total_amount = 0;
+        $arr = [];
+        $total_amount = 0;
 
-    foreach ($orders as $item) {
-        $product_id = $item['product_id'];
-        $unitQty = $item['unitQty'];
+        foreach ($orders as $item) {
+            $product_id = $item['product_id'];
+            $unitQty = $item['unitQty'];
 
-        $product = Product::where('id', $product_id)->first();
+            $product = Product::where('id', $product_id)->first();
 
-        $arr[] = [
-            'note' => $product->description,
-            'name' => $product->name,
-            'price' => $product->price * 100,
-            'unitQty' => $unitQty,
+            $arr[] = [
+                'note' => $product->description,
+                'name' => $product->name,
+                'price' => $product->price * 100,
+                'unitQty' => $unitQty,
+            ];
+
+            $total_amount = $total_amount + $product->price;
+        }
+
+
+        // Address, country code and zip code validation
+        $addressLine1 = $request->address1;  // Ensure address is not null
+        $countryCode = strtoupper($request->country);  // Ensure country is in 2-letter code format
+        $zipCode = $request->zip;  // Ensure zip code is non-null
+
+
+
+        $payload = [
+            "currency" => "USD",
+            "amount" => $total_amount * 100, // cents ($7.50)
+            "redirectUrl" => route('payment.success'), // Redirect URL on success
+            "shoppingCart" => [
+                "lineItems" => $arr
+            ],
+            "customer" => [
+                'full_name' => $request->full_name,
+                "address" => [
+                    "address1" => $addressLine1, // Ensure non-null address
+                    "address2" => $request->address2,            // Optional
+                    "city" => $request->city,
+                    "state" => $request->state,                     // Optional
+                    "zip" => $zipCode,            // Ensure non-null zip code
+                    "country" => $countryCode,         // 2-letter country code
+                ],
+                "phone_number" => $request->phone_number,
+            ]
         ];
 
-        $total_amount = $total_amount + $product->price;
+        $response = Http::withHeaders([
+            'accept' => 'application/json',
+            'content-type' => 'application/json',
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'X-Clover-Merchant-Id' => $this->merchantId,
+        ])->post("{$this->baseUrl}/invoicingcheckoutservice/v1/checkouts", $payload);
+
+        $data = $response->json();
+
+        return response()->json([
+            "error" => "Checkout creation successfully.",
+            "response" => $data
+        ], 400);
     }
-
-
-    // Address, country code and zip code validation
-    $addressLine1 = $request->address1;  // Ensure address is not null
-    $countryCode = strtoupper($request->country);  // Ensure country is in 2-letter code format
-    $zipCode = $request->zip;  // Ensure zip code is non-null
-
-    
-
-    $payload = [
-        "currency" => "USD",
-        "amount" => $total_amount * 100, // cents ($7.50)
-        "redirectUrl" => url('/payment/success'), // Redirect URL on success
-        "shoppingCart" => [
-            "lineItems" => $arr
-        ],
-        "customer" => [
-            'full_name' => $request->full_name,
-            "address" => [
-                "address1" => $addressLine1, // Ensure non-null address
-                "address2" => $request->address2,            // Optional
-                "city" => $request->city,
-                "state" => $request->state,                     // Optional
-                "zip" => $zipCode,            // Ensure non-null zip code
-                "country" => $countryCode,         // 2-letter country code
-            ],
-            "phone_number" => $request->phone_number,
-        ]
-    ];
-
-    $response = Http::withHeaders([
-        'accept' => 'application/json',
-        'content-type' => 'application/json',
-        'Authorization' => 'Bearer ' . $this->apiKey,
-        'X-Clover-Merchant-Id' => $this->merchantId,
-    ])->post("{$this->baseUrl}/invoicingcheckoutservice/v1/checkouts", $payload);
-
-    $data = $response->json();
-
-    return response()->json([
-        "error" => "Checkout creation successfully.",
-        "response" => $data
-    ], 400);
-}
 
 
     public function paymentSuccess(Request $request)
