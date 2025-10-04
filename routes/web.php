@@ -21,7 +21,7 @@ Route::get('/', function () {
 // Route::get('/payment/fail', [CloverController::class, 'paymentFail']);
 
 
-Route::get('/payment/success', function () {
-    // Here you can handle the payment success logic or view
-    return 'payment success page.';  // This will render a success page
-})->name('payment.success');
+// Route::get('/payment/success', function () {
+//     // Here you can handle the payment success logic or view
+//     return 'payment success page.';  // This will render a success page
+// })->name('payment.success');

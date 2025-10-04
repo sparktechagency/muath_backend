@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
+            $table->string('transaction_id');
             $table->decimal('amount',10,2);
             $table->date('payment_date');
             $table->string('status')->default('Completed');

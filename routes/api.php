@@ -3,7 +3,9 @@
 use App\Http\Controllers\Api\Admin\BannerController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\Admin\DashboardController;
+use App\Http\Controllers\Api\Admin\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController;
+use App\Http\Controllers\Api\Admin\TransactionController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CloverController;
 use App\Http\Controllers\Api\NotificationController;
@@ -27,8 +29,6 @@ Route::get('/get-categories', [CategoryController::class, 'getCategories']);
 Route::get('/get-products', [UserController::class, 'getProducts']);
 Route::get('/view-product/{id?}', [UserController::class, 'viewProduct']);
 
-Route::post('/create-checkout', [CloverController::class, 'createCheckout']);
-Route::get('/paid-status', [CloverController::class, 'paymentSuccess']);
 
 
 Route::middleware('auth:api')->group(function () {
@@ -38,6 +38,8 @@ Route::middleware('auth:api')->group(function () {
   Route::post('/edit-profile', [SettingsController::class, 'editProfile']);
   Route::post('/update-password', [AuthController::class, 'updatePassword']);
 
+  Route::post('/create-checkout', [CloverController::class, 'createCheckout']);
+  Route::post('/payment-success', [CloverController::class, 'paymentSuccess']);
 
   Route::middleware('admin')->prefix('admin')->group(function () {
     // dashboard
@@ -55,6 +57,15 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/view-category/{id?}', [CategoryController::class, 'viewCategory']);
     Route::put('/edit-category/{id?}', [CategoryController::class, 'editCategory']);
     Route::delete('/delete-category/{id?}', [CategoryController::class, 'deleteCategory']);
+
+    // order 
+    Route::get('/get-orders', [OrderController::class, 'getOrders']);
+    Route::get('/view-order/{id?}', [OrderController::class, 'viewOrder']);
+    Route::patch('/order-status-change', [OrderController::class, 'orderStatusChange']);
+
+    // transaction 
+    Route::get('/get-transactions', [TransactionController::class, 'getTransactions']);
+
     // setting
     Route::get('/get-feedbacks', [SettingsController::class, 'getFeedbacks']);
     Route::get('/view-feedback/{id}', [SettingsController::class, 'viewFeedback']);
