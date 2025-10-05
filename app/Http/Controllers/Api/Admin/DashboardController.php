@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Transaction;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -17,9 +18,9 @@ class DashboardController extends Controller
 
             $data = [
                 'total_users' => User::all()->count(),
-                'pending_orders' => User::all()->count(),
-                'completed_order' => User::all()->count(),
-                'total_revenue' => User::all()->count(),
+                'pending_orders' => Order::where('status','Pending')->count(),
+                'completed_order' => User::where('status','Completed')->count(),
+                'total_revenue' => Transaction::sum('amount'),
                 'orders' => Order::latest()->paginate($request->per_page ?? 10),
             ];
 
