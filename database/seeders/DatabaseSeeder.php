@@ -30,6 +30,15 @@ class DatabaseSeeder extends Seeder
             'status' => 'Active',
         ]);
 
+        User::create([
+            'full_name' => 'User one',
+            'email' => 'user.one@gmail.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('12345678'),
+            'role' => 'USER',
+            'status' => 'Active',
+        ]);
+
         Banner::create([
             'banner' => null
         ]);

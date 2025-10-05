@@ -85,22 +85,25 @@ class CloverController extends Controller
 
         $data = $response->json();
 
-        Metadata::create([
-            'checkout_session_id' => isset($data['checkoutSessionId']) ? $data['checkoutSessionId'] : null,
-            'user_id' => Auth::id(),
-            'full_name' => $request->full_name,
-            'address' => $request->address,
-            'phone_number' => $request->phone_number,
-            'city' => $request->city,
-            'state' => $request->state,
-            'zip_code' => $request->zip_code,
-            'country' => $request->country
-        ]);
+        if (isset($data['checkoutSessionId'])) {
+            Metadata::create([
+                'checkout_session_id' => $data['checkoutSessionId'],
+                'user_id' => Auth::id(),
+                'full_name' => $request->full_name,
+                'address' => $request->address,
+                'phone_number' => $request->phone_number,
+                'city' => $request->city,
+                'state' => $request->state,
+                'zip_code' => $request->zip_code,
+                'country' => $request->country
+            ]);
+        }
 
         return response()->json([
-            "error" => "Checkout creation successfully.",
+            'status' => isset($data['checkoutSessionId']) ? true : false,
+            "message" => isset($data['checkoutSessionId']) ? "Checkout creation successfully." : "You are not authorized to access this resource.",
             "response" => $data
-        ], 201);
+        ], isset($data['checkoutSessionId']) ? 201 : 401);
     }
 
 
@@ -112,7 +115,6 @@ class CloverController extends Controller
             return response()->json(["error" => "No checkoutSessionId found"]);
         }
 
-        // Fetch payment details after redirect
         $response = Http::withHeaders([
             'accept' => 'application/json',
             'Authorization' => 'Bearer ' . $this->apiKey,
@@ -121,7 +123,6 @@ class CloverController extends Controller
         $details = $response->json();
 
         $paymentStatus = $details['status'];
-
 
         if ($paymentStatus != 'PAID') {
             return response()->json([
@@ -165,7 +166,7 @@ class CloverController extends Controller
 
         return response()->json([
             "status" => true,
-            "message" => "Payment Successful",
+            "message" => "Payment Successfull.",
             "metadata" => $metadata,
             "delails" => $details,
         ]);
