@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
+use App\Models\Metadata;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Report;
 use Exception;
@@ -162,6 +164,21 @@ class UserController extends Controller
             }
         }
         return response()->json($cart_item);
+    }
+
+    public function getMyOrders(Request $request)
+    {
+        $orders = Order::with('user')->latest()->get();
+
+        foreach ($orders as $order) {
+            $order->metadata = Metadata::where('checkout_session_id',$order->checkout_session_id)->first();
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Get my orders',
+            'orders' => $orders
+        ]);
     }
 
 }

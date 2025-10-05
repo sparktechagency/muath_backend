@@ -81,5 +81,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/send-feedback', [UserController::class, 'sendFeedback']);
     // Route::patch('/count-up', [UserController::class, 'countUp']);
     // Route::patch('/count-down', [UserController::class, 'countDown']);
+    Route::get('/get-my-orders', [UserController::class, 'getMyOrders']);
   });
 });

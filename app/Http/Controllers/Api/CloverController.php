@@ -142,6 +142,7 @@ class CloverController extends Controller
         ])->get("{$this->baseUrl}/v3/merchants/{$details['merchant']['id']}/payments/{$details['paymentDetails'][0]['id']}");
 
         $order = Order::create([
+            'checkout_session_id' => $checkoutSessionId,
             'user_id' => $metadata->user_id,
             'order_id' => $getTransation['order']['id'],
             'price' => $details['paymentDetails'][0]['amount'] / 100,
@@ -157,6 +158,7 @@ class CloverController extends Controller
         }
 
         Transaction::create([
+            'checkout_session_id' => $checkoutSessionId,
             'user_id' => $metadata->user_id,
             'transaction_id' => $getTransation['id'],
             'amount' => $details['paymentDetails'][0]['amount'] / 100,
