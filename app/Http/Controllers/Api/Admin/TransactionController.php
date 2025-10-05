@@ -16,7 +16,7 @@ class TransactionController extends Controller
         $search = $request->input('search', '');
 
         $transactions = Transaction::with(['user' => function ($q) {
-            $q->select('id', 'full_name', 'role', 'avatar'); }])  // Ensure user relationship is loaded
+            $q->select('id', 'full_name', 'role', 'avatar'); },'metadata'])  // Ensure user relationship is loaded
             ->when($search, function ($query) use ($search) {
                 return $query->where('transaction_id', 'like', "%{$search}%")
                     ->orWhere('status', 'like', "%{$search}%")
@@ -27,9 +27,9 @@ class TransactionController extends Controller
             ->latest()
             ->get();
 
-        foreach ($transactions as $transaction) {
-            $transaction->metadata = Metadata::where('checkout_session_id', $transaction->checkout_session_id)->first();
-        }
+        // foreach ($transactions as $transaction) {
+        //     $transaction->metadata = Metadata::where('checkout_session_id', $transaction->checkout_session_id)->first();
+        // }
 
         return response()->json([
             'status' => true,

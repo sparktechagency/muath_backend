@@ -168,11 +168,11 @@ class UserController extends Controller
 
     public function getMyOrders(Request $request)
     {
-        $orders = Order::with('user')->latest()->get();
+        $orders = Order::with(['user','order_items'])->where('user_id',Auth::id())->latest()->get();
 
-        foreach ($orders as $order) {
-            $order->metadata = Metadata::where('checkout_session_id',$order->checkout_session_id)->first();
-        }
+        // foreach ($orders as $order) {
+        //     $order->metadata = Metadata::where('checkout_session_id',$order->checkout_session_id)->first();
+        // }
 
         return response()->json([
             'status' => true,

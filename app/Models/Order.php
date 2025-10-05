@@ -19,4 +19,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function metadata()
+    {
+        return $this->hasOne(Metadata::class, 'checkout_session_id', 'checkout_session_id');
+    }
 }
