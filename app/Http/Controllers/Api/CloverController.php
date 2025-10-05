@@ -141,37 +141,46 @@ class CloverController extends Controller
             'Authorization' => 'Bearer ' . $this->apiKey,
         ])->get("{$this->baseUrl}/v3/merchants/{$details['merchant']['id']}/payments/{$details['paymentDetails'][0]['id']}");
 
-        $order = Order::create([
-            'checkout_session_id' => $checkoutSessionId,
-            'user_id' => $metadata->user_id,
-            'order_id' => $getTransation['order']['id'],
-            'price' => $details['paymentDetails'][0]['amount'] / 100,
-        ]);
+        $is_checkout_session = Order::where('checkout_session_id', $checkoutSessionId)->exists();
 
-        foreach ($lineItems as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'name' => $item['name'],
-                'quantity' => $item['unitQty'],
-                'price' => $item['price'],
+        if (!$is_checkout_session) {
+            $order = Order::create([
+                'checkout_session_id' => $checkoutSessionId,
+                'user_id' => $metadata->user_id,
+                'order_id' => $getTransation['order']['id'],
+                'price' => $details['paymentDetails'][0]['amount'] / 100,
+            ]);
+
+            foreach ($lineItems as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'name' => $item['name'],
+                    'quantity' => $item['unitQty'],
+                    'price' => $item['price'],
+                ]);
+            }
+
+            Transaction::create([
+                'checkout_session_id' => $checkoutSessionId,
+                'user_id' => $metadata->user_id,
+                'transaction_id' => $getTransation['id'],
+                'amount' => $details['paymentDetails'][0]['amount'] / 100,
+                'payment_date' => Carbon::now(),
+                'status' => 'Completed',
+            ]);
+
+            return response()->json([
+                "status" => true,
+                "message" => "Payment Successfull.",
+                "metadata" => $metadata,
+                "delails" => $details,
+            ]);
+        } else {
+            return response()->json([
+                "status" => true,
+                "message" => "Payment already stored.",
             ]);
         }
-
-        Transaction::create([
-            'checkout_session_id' => $checkoutSessionId,
-            'user_id' => $metadata->user_id,
-            'transaction_id' => $getTransation['id'],
-            'amount' => $details['paymentDetails'][0]['amount'] / 100,
-            'payment_date' => Carbon::now(),
-            'status' => 'Completed',
-        ]);
-
-        return response()->json([
-            "status" => true,
-            "message" => "Payment Successfull.",
-            "metadata" => $metadata,
-            "delails" => $details,
-        ]);
     }
 
 }
