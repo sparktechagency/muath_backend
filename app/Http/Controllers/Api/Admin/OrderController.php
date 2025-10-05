@@ -46,7 +46,7 @@ class OrderController extends Controller
 
     public function viewOrder($id)
     {
-        $order = Order::where('id', $id)->first();
+        $order = Order::with('order_items')->where('id', $id)->first();
 
         if (!$order) {
             return response()->json(['error' => 'Order not found'], 404);
