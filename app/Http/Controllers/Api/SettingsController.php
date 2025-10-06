@@ -21,7 +21,6 @@ class SettingsController extends Controller
 
         return response()->json(['status' => true, 'data' => $reports]);
     }
-
     public function viewFeedback($id)
     {
         $report = Report::find($id);
@@ -32,7 +31,6 @@ class SettingsController extends Controller
 
         return response()->json(['status' => true, 'data' => $report]);
     }
-
     public function deleteFeedback($id)
     {
         $report = Report::find($id);

@@ -5,13 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Product extends Model
+class Pack extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
 
-    public function packs()
+    public function product()
     {
-        return $this->hasMany(Pack::class); // Define one-to-many relationship with Pack
+        return $this->belongsTo(Product::class); // Define inverse relationship (many-to-one)
     }
 }

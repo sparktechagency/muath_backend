@@ -11,15 +11,15 @@ class OrderController extends Controller
 {
     public function getOrders(Request $request)
     {
-        $search = $request->input('search', ''); // Default to empty if not provided
-        $status = $request->input('status', ''); // Get status filter (e.g., Pending, Completed)
+        $search = $request->input('search', '');
+        $status = $request->input('status', '');
 
-        // Query for orders, filtering based on search term, user name and status filter
         $orders = Order::with([
             'user' => function ($q) {
                 $q->select('id', 'full_name', 'role', 'avatar');
-            },'metadata'
-        ],)  // Ensure user relationship is loaded
+            },
+            'metadata'
+        ], )
             ->when($search, function ($query) use ($search) {
                 return $query->where('order_id', 'like', "%{$search}%")
                     ->orWhere('status', 'like', "%{$search}%")
@@ -33,26 +33,19 @@ class OrderController extends Controller
             ->latest()
             ->get();
 
-        // foreach ($orders as $order) {
-        //     $order->metadata = Metadata::where('checkout_session_id', $order->checkout_session_id)->first();
-        // }
-
         return response()->json([
             'status' => true,
             'message' => 'Get orders',
             'orders' => $orders
         ]);
     }
-
     public function viewOrder($id)
     {
-        $order = Order::with(['order_items','metadata'])->where('id', $id)->first();
+        $order = Order::with(['order_items', 'metadata'])->where('id', $id)->first();
 
         if (!$order) {
             return response()->json(['error' => 'Order not found'], 404);
         }
-
-        // $order->metadata = Metadata::where('checkout_session_id', $order->checkout_session_id)->first();
 
         return response()->json([
             'status' => true,
@@ -60,7 +53,6 @@ class OrderController extends Controller
             'order' => $order
         ]);
     }
-
     public function orderStatusChange(Request $request)
     {
         $request->validate([

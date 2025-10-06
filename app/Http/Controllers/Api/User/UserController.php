@@ -71,7 +71,6 @@ class UserController extends Controller
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
-
     public function addToCart(Request $request)
     {
         $validated = $request->validate([
@@ -95,7 +94,6 @@ class UserController extends Controller
         }
         return response()->json(['status' => true, 'message' => 'Product added to cart']);
     }
-
     public function myCart()
     {
         $cartItems = Cart::where('user_id', Auth::id())
@@ -108,20 +106,16 @@ class UserController extends Controller
 
         return response()->json(['status' => true, 'data' => $cartItems]);
     }
-
     public function clearMyCart()
     {
         Cart::where('user_id', Auth::id())->delete();
         return response()->json(['status' => true, 'message' => 'Your cart has been cleared']);
     }
-
     public function removeCartProduct($id)
     {
-
         Cart::where('id', $id)->delete();
         return response()->json(['status' => true, 'message' => 'Product removed from cart.']);
     }
-
     public function sendFeedback(Request $request)
     {
         $validated = $request->validate([
@@ -139,7 +133,6 @@ class UserController extends Controller
 
         return response()->json(['status' => true, 'message' => 'Send feedback to admin.', 'data' => $report]);
     }
-
     public function countUp(Request $request)
     {
         $cart_item = Cart::where('id', $request->cart_id)->first();
@@ -152,7 +145,6 @@ class UserController extends Controller
         }
         return response()->json($cart_item);
     }
-
     public function countDown(Request $request)
     {
         $cart_item = Cart::where('id', $request->cart_id)->first();
@@ -165,15 +157,9 @@ class UserController extends Controller
         }
         return response()->json($cart_item);
     }
-
     public function getMyOrders(Request $request)
     {
         $orders = Order::with(['user','order_items'])->where('user_id',Auth::id())->latest()->get();
-
-        // foreach ($orders as $order) {
-        //     $order->metadata = Metadata::where('checkout_session_id',$order->checkout_session_id)->first();
-        // }
-
         return response()->json([
             'status' => true,
             'message' => 'Get my orders',

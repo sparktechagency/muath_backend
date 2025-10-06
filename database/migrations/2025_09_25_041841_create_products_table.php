@@ -18,7 +18,6 @@ return new class extends Migration
             $table->decimal('price',10,2);
             $table->string('description');
             $table->json('images');
-            $table->json('packs')->nullable();
             $table->string('additional_description')->nullable();
             $table->timestamps();
         });

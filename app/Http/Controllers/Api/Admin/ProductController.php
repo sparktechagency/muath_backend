@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pack;
 use App\Models\Product;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -21,7 +22,7 @@ class ProductController extends Controller
                 'price' => 'required|numeric|min:0',
                 'description' => 'required|string',
                 'images' => 'required|array',
-                'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:20480', // 20 MB
+                'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:20480',
                 'packs' => 'nullable',
                 'additional_description' => 'nullable|string',
             ]);
@@ -32,7 +33,6 @@ class ProductController extends Controller
                     'message' => $validator->errors()
                 ], 422);
             }
-
 
             $imagePaths = [];
             if ($request->hasFile('images')) {
@@ -47,19 +47,36 @@ class ProductController extends Controller
                 'price' => $request->price,
                 'description' => $request->description,
                 'images' => json_encode($imagePaths),
-                'packs' => $request->packs,
                 'additional_description' => $request->additional_description,
             ]);
+
+            $packs = is_string($request->packs) ? json_decode($request->packs, true) : $request->packs;
+            if (!is_array($packs)) {
+                return response()->json(['error' => 'Invalid packs format'], 400);
+            }
+
+            $pack_arr = [];
+            foreach ($packs as $item) {
+                $packs = Pack::create([
+                    'product_id' => $product->id,
+                    'pack_size' => $item['pack_size'],
+                    'price' => $item['price']
+                ]);
+
+                $pack_arr[] = $packs;
+            }
+
+            $product->packs = $pack_arr;
+
             return $this->sendResponse($product, 'Product added successfully.', true, 201);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
-
     public function getProducts(Request $request)
     {
         try {
-            $query = Product::query();
+            $query = Product::with('packs'); // Correct the query initialization
 
             if ($request->has('search') && !empty($request->search)) {
                 $search = $request->search;
@@ -76,13 +93,15 @@ class ProductController extends Controller
 
             $products = $query->latest()->paginate(10);
 
+            // Process product images and packs
             foreach ($products as $product) {
-
                 $product->images = array_map(function ($image) {
                     return asset($image);
                 }, json_decode($product->images, true));
+
                 $product->packs = !empty($product->packs) ? json_decode($product->packs, true) : [];
             }
+
             return $this->sendResponse($products, 'Get products.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
@@ -91,28 +110,33 @@ class ProductController extends Controller
     public function editProduct(Request $request, $id)
     {
         try {
-            $validated = $request->validate([
-                'name' => 'sometimes|string|max:255',
-                'price' => 'sometimes|numeric|min:0',
-                'description' => 'sometimes|string',
-                'images' => 'sometimes|array',
+            $validator = Validator::make($request->all(), [
+                'category' => 'nullable|string|max:255',
+                'name' => 'nullable|string|max:255',
+                'price' => 'nullable|numeric|min:0',
+                'description' => 'nullable|string',
+                'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:20480', // 20 MB
+                'packs' => 'nullable',
+                'additional_description' => 'nullable|string',
             ]);
 
-            $product = Product::find($id);
-
-            if (!$product) {
-                return $this->sendError('Product not found!.', []);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()
+                ], 422);
             }
 
+            $product = Product::findOrFail($id);
+
+            $oldImages = json_decode($product->images, true);
+
             if ($request->hasFile('images')) {
-                if ($product->images) {
-                    $oldImages = json_decode($product->images, true);
-                    foreach ($oldImages as $oldImage) {
-                        $oldImagePath = str_replace('/storage/', '', $oldImage);
-                        if (Storage::disk('public')->exists($oldImagePath)) {
-                            Storage::disk('public')->delete($oldImagePath);
-                        }
+                foreach ($oldImages as $image) {
+                    $imagePath = public_path($image);
+                    if (file_exists($imagePath)) {
+                        unlink($imagePath);
                     }
                 }
 
@@ -120,12 +144,40 @@ class ProductController extends Controller
                 foreach ($request->file('images') as $image) {
                     $imagePaths[] = '/storage/' . $image->store('products', 'public');
                 }
-                $validated['images'] = json_encode($imagePaths);
+                $product->images = json_encode($imagePaths) ?? $product->images;
             }
 
-            $product->update($validated);
-            return $this->sendResponse($product, 'Product updated successfully.');
+            $product->category = $request->category ?? $product->category;
+            $product->name = $request->name ?? $product->name;
+            $product->price = $request->price ?? $product->price;
+            $product->description = $request->description ?? $product->description;
+            $product->additional_description = $request->additional_description ?? $product->additional_description;
 
+            $product->save();
+
+            if ($request->has('packs')) {
+                $product->packs()->delete();
+
+                $packs = is_string($request->packs) ? json_decode($request->packs, true) : $request->packs;
+
+                if (!is_array($packs)) {
+                    return response()->json(['error' => 'Invalid packs format'], 400);
+                }
+
+                $pack_arr = [];
+                foreach ($packs as $item) {
+                    $packs = Pack::create([
+                        'product_id' => $product->id,
+                        'pack_size' => $item['pack_size'],
+                        'price' => $item['price']
+                    ]);
+                    $pack_arr[] = $packs;
+                }
+            }
+
+            $product->packs = $pack_arr;
+
+            return $this->sendResponse($product, 'Product updated successfully.', true, 200);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
@@ -133,15 +185,16 @@ class ProductController extends Controller
     public function viewProduct($id)
     {
         try {
-            $product = Product::find($id);
+            $product = Product::with('packs')->find($id);
+
             if (!$product) {
-                return $this->sendError('Product not found!.', []);
+                return $this->sendError('Product not found!', []);
             }
 
             $product->images = array_map(function ($image) {
                 return asset($image);
             }, json_decode($product->images, true));
-            $product->packs = !empty($product->packs) ? json_decode($product->packs, true) : [];
+
             return $this->sendResponse($product, 'View product.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);

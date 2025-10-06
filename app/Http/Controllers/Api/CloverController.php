@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Metadata;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Pack;
 use App\Models\Product;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -20,20 +21,17 @@ use Laravel\Pail\ValueObjects\Origin\Http as OriginHttp;
 
 class CloverController extends Controller
 {
-
     protected $apiKey;
     protected $merchantId;
     protected $baseUrl;
 
     public function __construct()
     {
-        // Configuration values
         $this->apiKey = config('services.clover.api_key');
         $this->merchantId = config('services.clover.merchant_id');
         $this->baseUrl = config('services.clover.base_url', 'https://apisandbox.dev.clover.com');
 
     }
-
     public function createCheckout(Request $request)
     {
         $orders = is_string($request->orders) ? json_decode($request->orders, true) : $request->orders;
@@ -45,20 +43,46 @@ class CloverController extends Controller
         $arr = [];
         $total_amount = 0;
 
-        foreach ($orders as $item) {
-            $product_id = $item['product_id'];
-            $unitQty = $item['unitQty'];
+        if (isset($orders[0]['pack_id'])) {
+            $product_id = $orders[0]['product_id'];
+            $pack_id = $orders[0]['pack_id'];
 
             $product = Product::where('id', $product_id)->first();
+            $pack = Pack::where('id', $pack_id)->first();
+
+            if (!$product || !$pack) {
+                return response()->json(['error' => 'Product or Pack not found.'], 404);
+            }
 
             $arr[] = [
                 'note' => $product->description,
                 'name' => $product->name,
-                'price' => $product->price * 100,
-                'unitQty' => $unitQty,
+                'price' => $pack->price * 100,
+                'unitQty' => 1,
             ];
 
-            $total_amount = $total_amount + $product->price;
+            $total_amount += $product->price;
+
+        } else {
+            foreach ($orders as $item) {
+                $product_id = $item['product_id'];
+                $unitQty = $item['unitQty'];
+
+                $product = Product::where('id', $product_id)->first();
+
+                if (!$product) {
+                    return response()->json(['error' => 'Product not found.'], 404);
+                }
+
+                $arr[] = [
+                    'note' => $product->description,
+                    'name' => $product->name,
+                    'price' => $product->price * 100,
+                    'unitQty' => $unitQty,
+                ];
+
+                $total_amount += $product->price;
+            }
         }
 
         $payload = [
@@ -73,7 +97,6 @@ class CloverController extends Controller
                 "firstName" => Auth::user()->full_name,
                 "lastName" => ' ',
             ]
-
         ];
 
         $response = Http::withHeaders([
@@ -105,8 +128,6 @@ class CloverController extends Controller
             "response" => $data
         ], isset($data['checkoutSessionId']) ? 201 : 401);
     }
-
-
     public function paymentSuccess(Request $request)
     {
         $checkoutSessionId = $request->query('checkoutSessionId');

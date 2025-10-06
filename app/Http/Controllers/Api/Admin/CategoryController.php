@@ -19,7 +19,6 @@ class CategoryController extends Controller
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
-
     public function addCategory(Request $request)
     {
         try {
@@ -32,7 +31,6 @@ class CategoryController extends Controller
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
-
     public function viewCategory($id)
     {
         try {
@@ -45,7 +43,6 @@ class CategoryController extends Controller
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
-
     public function editCategory(Request $request, $id)
     {
         try {
@@ -62,7 +59,6 @@ class CategoryController extends Controller
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
         }
     }
-
     public function deleteCategory($id)
     {
         try {

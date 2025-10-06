@@ -27,15 +27,10 @@ class TransactionController extends Controller
             ->latest()
             ->get();
 
-        // foreach ($transactions as $transaction) {
-        //     $transaction->metadata = Metadata::where('checkout_session_id', $transaction->checkout_session_id)->first();
-        // }
-
         return response()->json([
             'status' => true,
             'message' => 'Get transactions',
             'orders' => $transactions
         ]);
     }
-
 }

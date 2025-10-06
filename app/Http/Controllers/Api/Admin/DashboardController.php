@@ -14,13 +14,11 @@ class DashboardController extends Controller
     public function basicInfo(Request $request)
     {
         try {
-
-
             $data = [
                 'total_users' => User::all()->count(),
                 'pending_orders' => Order::where('status','Pending')->count(),
                 'completed_order' => User::where('status','Completed')->count(),
-                'total_revenue' => Transaction::sum('amount'),
+                'total_revenue' => '$'.Transaction::sum('amount'),
                 'orders' => Order::latest()->paginate($request->per_page ?? 10),
             ];
 
