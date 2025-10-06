@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Transaction;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -16,9 +17,10 @@ class DashboardController extends Controller
         try {
             $data = [
                 'total_users' => User::all()->count(),
-                'pending_orders' => Order::where('status','Pending')->count(),
-                'completed_order' => User::where('status','Completed')->count(),
-                'total_revenue' => '$'.Transaction::sum('amount'),
+                'pending_orders' => Order::where('status', 'Pending')->count(),
+                'completed_order' => User::where('status', 'Completed')->count(),
+                'total_revenue' => '$' . Transaction::sum('amount'),
+                'today_revenue' => '$' . Transaction::whereDate('payment_date', Carbon::now()->toDateString())->sum('amount'),
                 'orders' => Order::latest()->paginate($request->per_page ?? 10),
             ];
 
