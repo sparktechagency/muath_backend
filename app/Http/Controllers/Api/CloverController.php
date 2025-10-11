@@ -96,8 +96,8 @@ class CloverController extends Controller
                 "lineItems" => $arr
             ],
             "customer" => [
-                "email" => Auth::user()->email ?? $request->email,
-                "firstName" => Auth::user()->full_name ?? $request->full_name,
+                "email" => $request->email,
+                "firstName" =>$request->full_name,
                 "lastName" => ' ',
             ]
         ];
@@ -111,27 +111,10 @@ class CloverController extends Controller
 
         $data = $response->json();
 
-         $validator = Validator::make($request->all(), [
-                'email' => 'nullable|string|email|max:255|unique:users,email',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => $validator->errors()->first()
-                ], 422);
-            }
-
-        $guest = User::create([
-            'email' => $request->email,
-            'full_name' => $request->full_name,
-            'password' => Hash::make('12345678'),
-        ]);
-
         if (isset($data['checkoutSessionId'])) {
             Metadata::create([
                 'checkout_session_id' => $data['checkoutSessionId'],
-                'user_id' => Auth::id() ?? $guest->id,
+                'user_id' => rand(000000,999999),
                 'email' => $request->email,
                 'full_name' => $request->full_name,
                 'address' => $request->address,
@@ -149,6 +132,10 @@ class CloverController extends Controller
             "response" => $data
         ], isset($data['checkoutSessionId']) ? 201 : 401);
     }
+
+
+
+
     public function paymentSuccess(Request $request)
     {
         $checkoutSessionId = $request->query('checkoutSessionId');
