@@ -29,6 +29,8 @@ Route::get('/get-categories', [CategoryController::class, 'getCategories']);
 Route::get('/get-products', [UserController::class, 'getProducts']);
 Route::get('/view-product/{id?}', [UserController::class, 'viewProduct']);
 
+Route::post('/create-checkout', [CloverController::class, 'createCheckout']);
+Route::post('/payment-success', [CloverController::class, 'paymentSuccess']);
 
 
 Route::middleware('auth:api')->group(function () {
@@ -37,9 +39,6 @@ Route::middleware('auth:api')->group(function () {
   Route::get('/get-profile', [AuthController::class, 'getProfile']);
   Route::post('/edit-profile', [SettingsController::class, 'editProfile']);
   Route::post('/update-password', [AuthController::class, 'updatePassword']);
-
-  Route::post('/create-checkout', [CloverController::class, 'createCheckout']);
-  Route::post('/payment-success', [CloverController::class, 'paymentSuccess']);
 
   Route::middleware('admin')->prefix('admin')->group(function () {
     // dashboard

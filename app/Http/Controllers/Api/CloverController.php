@@ -9,14 +9,17 @@ use App\Models\OrderItem;
 use App\Models\Pack;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Pail\ValueObjects\Origin\Http as OriginHttp;
 
 class CloverController extends Controller
@@ -93,8 +96,8 @@ class CloverController extends Controller
                 "lineItems" => $arr
             ],
             "customer" => [
-                "email" => Auth::user()->email,
-                "firstName" => Auth::user()->full_name,
+                "email" => Auth::user()->email ?? $request->email,
+                "firstName" => Auth::user()->full_name ?? $request->full_name,
                 "lastName" => ' ',
             ]
         ];
@@ -108,10 +111,28 @@ class CloverController extends Controller
 
         $data = $response->json();
 
+         $validator = Validator::make($request->all(), [
+                'email' => 'nullable|string|email|max:255|unique:users,email',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+        $guest = User::create([
+            'email' => $request->email,
+            'full_name' => $request->full_name,
+            'password' => Hash::make('12345678'),
+        ]);
+
         if (isset($data['checkoutSessionId'])) {
             Metadata::create([
                 'checkout_session_id' => $data['checkoutSessionId'],
-                'user_id' => Auth::id(),
+                'user_id' => Auth::id() ?? $guest->id,
+                'email' => $request->email,
                 'full_name' => $request->full_name,
                 'address' => $request->address,
                 'phone_number' => $request->phone_number,
@@ -167,7 +188,6 @@ class CloverController extends Controller
         if (!$is_checkout_session) {
             $order = Order::create([
                 'checkout_session_id' => $checkoutSessionId,
-                'user_id' => $metadata->user_id,
                 'order_id' => $getTransation['order']['id'],
                 'price' => $details['paymentDetails'][0]['amount'] / 100,
             ]);
@@ -183,7 +203,6 @@ class CloverController extends Controller
 
             Transaction::create([
                 'checkout_session_id' => $checkoutSessionId,
-                'user_id' => $metadata->user_id,
                 'transaction_id' => $getTransation['id'],
                 'amount' => $details['paymentDetails'][0]['amount'] / 100,
                 'payment_date' => Carbon::now(),
