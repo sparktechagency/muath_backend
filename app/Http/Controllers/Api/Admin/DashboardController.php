@@ -18,7 +18,7 @@ class DashboardController extends Controller
             $data = [
                 'total_users' => User::all()->count(),
                 'pending_orders' => Order::where('status', 'Pending')->count(),
-                'completed_order' => User::where('status', 'Completed')->count(),
+                'completed_order' => Order::where('status', 'Completed')->count(),
                 'total_revenue' => '$' . Transaction::sum('amount'),
                 'today_revenue' => '$' . Transaction::whereDate('payment_date', Carbon::now()->toDateString())->sum('amount'),
                 'orders' => Order::latest()->paginate($request->per_page ?? 10),
