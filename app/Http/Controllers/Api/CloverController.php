@@ -132,10 +132,6 @@ class CloverController extends Controller
             "response" => $data
         ], isset($data['checkoutSessionId']) ? 201 : 401);
     }
-
-
-
-
     public function paymentSuccess(Request $request)
     {
         $checkoutSessionId = $request->query('checkoutSessionId');

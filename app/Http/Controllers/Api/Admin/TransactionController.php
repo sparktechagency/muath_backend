@@ -15,8 +15,7 @@ class TransactionController extends Controller
     {
         $search = $request->input('search', '');
 
-        $transactions = Transaction::with(['user' => function ($q) {
-            $q->select('id', 'full_name', 'role', 'avatar'); },'metadata'])  // Ensure user relationship is loaded
+        $transactions = Transaction::with('metadata')  // Ensure user relationship is loaded
             ->when($search, function ($query) use ($search) {
                 return $query->where('transaction_id', 'like', "%{$search}%")
                     ->orWhere('status', 'like', "%{$search}%")

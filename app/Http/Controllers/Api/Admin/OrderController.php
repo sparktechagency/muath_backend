@@ -14,12 +14,7 @@ class OrderController extends Controller
         $search = $request->input('search', '');
         $status = $request->input('status', '');
 
-        $orders = Order::with([
-            'user' => function ($q) {
-                $q->select('id', 'full_name', 'role', 'avatar');
-            },
-            'metadata'
-        ], )
+        $orders = Order::with('metadata')
             ->when($search, function ($query) use ($search) {
                 return $query->where('order_id', 'like', "%{$search}%")
                     ->orWhere('status', 'like', "%{$search}%")
