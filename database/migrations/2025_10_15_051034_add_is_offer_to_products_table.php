@@ -8,14 +8,14 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->boolean('is_offer')->nullable(); // Adds the is_offer column
+            $table->boolean('is_offer')->nullable();
         });
     }
 
     public function down()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('is_offer'); // Drops the column if the migration is rolled back
+            $table->dropColumn('is_offer');
         });
     }
 
