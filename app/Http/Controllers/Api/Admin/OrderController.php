@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendCustomOrder;
 use App\Models\Metadata;
 use App\Models\Order;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -68,6 +72,20 @@ class OrderController extends Controller
             'message' => 'Order status updated successfully',
             'order' => $order
         ]);
+    }
+
+    public function sendCustomOrder(Request $request)
+    {
+            $order = $request->all();
+
+            Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Send order successfully.',
+                'data' => $order,
+            ], 201);
+       
     }
 
 }
