@@ -122,6 +122,7 @@ class ProductController extends Controller
                 'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:20480', // 20 MB
                 'packs' => 'nullable',
                 'additional_description' => 'nullable|string',
+                'is_offer' => 'nullable|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -155,6 +156,7 @@ class ProductController extends Controller
             $product->price = $request->price ?? $product->price;
             $product->description = $request->description ?? $product->description;
             $product->additional_description = $request->additional_description ?? $product->additional_description;
+            $product->is_offer = $request->is_offer ?? $product->is_offer;
 
             $product->save();
 
