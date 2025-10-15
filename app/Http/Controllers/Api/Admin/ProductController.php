@@ -25,6 +25,7 @@ class ProductController extends Controller
                 'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:20480',
                 'packs' => 'nullable',
                 'additional_description' => 'nullable|string',
+                'is_offer' => 'nullable|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -48,6 +49,8 @@ class ProductController extends Controller
                 'description' => $request->description,
                 'images' => json_encode($imagePaths),
                 'additional_description' => $request->additional_description,
+                'is_offer' => $request->is_offer,
+
             ]);
 
             $packs = is_string($request->packs) ? json_decode($request->packs, true) : $request->packs;
