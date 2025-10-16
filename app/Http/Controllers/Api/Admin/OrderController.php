@@ -101,24 +101,7 @@ class OrderController extends Controller
     public function sendCustomOrder(Request $request)
 {
     $order = $request->all();
-
-    if (isset($order['date'])) {
-        // অতিরিক্ত স্পেস বা অপ্রত্যাশিত চরিত্র মুছে ফেলুন
-        $order['date'] = trim($order['date']);
-
-        try {
-            // তারিখটি 'Y/m/d' ফরম্যাটে পার্স করা
-            $order['date'] = Carbon::createFromFormat('Y/m/d', $order['date'])->format('d F, Y');
-        } catch (Exception $e) {
-            // যদি তারিখ পার্স না হয়, তাহলে ত্রুটি বার্তা দিন
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid date format. Please use Y/m/d format.',
-            ], 400);
-        }
-    }
-
-    // মেইল পাঠানো
+    
     Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
     return response()->json([
