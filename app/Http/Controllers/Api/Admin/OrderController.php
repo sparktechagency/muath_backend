@@ -108,7 +108,7 @@ class OrderController extends Controller
 
         try {
             // তারিখটি 'Y/m/d' ফরম্যাটে পার্স করা
-            $order['date'] = Carbon::createFromFormat('Y-m-d', $order['date'])->format('d F, Y');
+            $order['date'] = Carbon::createFromFormat('Y/m/d', $order['date'])->format('d F, Y');
         } catch (Exception $e) {
             // যদি তারিখ পার্স না হয়, তাহলে ত্রুটি বার্তা দিন
             return response()->json([
