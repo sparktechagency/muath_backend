@@ -80,18 +80,21 @@ class OrderController extends Controller
         $order = $request->all();
 
         if (isset($order['date'])) {
-            $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->toDateString();
-        }
+            $order['date'] = trim($order['date']);
 
-        if (isset($order['date'])) {
-            $order['date'] = Carbon::parse($order['date'])->format('d F, Y');
+            try {
+                $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->format('d F, Y');
+            } catch (Exception $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid date format.',
+                ], 400);
+            }
         }
-
-        Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
         return response()->json([
             'status' => true,
-            'message' => 'Send order successfully.',
+            'message' => 'Order sent successfully.',
             'data' => $order,
         ], 201);
 
