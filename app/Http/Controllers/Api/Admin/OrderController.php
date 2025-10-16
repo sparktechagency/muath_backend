@@ -91,23 +91,10 @@ class OrderController extends Controller
             'description' => $request->description,
         ];
 
-
-        // if (isset($order['date'])) {
-
-        //     $order['date'] = Carbon::parse($order['date'])->toDateString(); // শুধু YYYY-MM-DD
-        // }
-
-
-        // date ফিল্ডটি যদি থাকে, সেটি সঠিক ফরম্যাটে কনভার্ট করা
         if (isset($order['date'])) {
-            // Carbon দিয়ে ইনপুট ডেটাটি পার্স করা এবং 'd F, Y' ফরম্যাটে কনভার্ট করা
             $order['date'] = Carbon::parse($order['date'])->format('d F, Y');
-
-            // 'October' কে 'Octobar' দিয়ে প্রতিস্থাপন করা
-            $order['date'] = str_replace('October', 'Octobar', $order['date']);
+            // $order['date'] = str_replace('October', 'Octobar', $order['date']);
         }
-
-
 
         Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
