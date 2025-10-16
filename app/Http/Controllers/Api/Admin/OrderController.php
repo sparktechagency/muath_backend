@@ -78,9 +78,13 @@ class OrderController extends Controller
     public function sendCustomOrder(Request $request)
     {
         $order = $request->all();
-        
+
         if (isset($order['date'])) {
             $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->toDateString();
+        }
+
+        if (isset($order['date'])) {
+            $order['date'] = Carbon::parse($order['date'])->format('d F, Y');
         }
 
         Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
