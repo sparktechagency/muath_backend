@@ -79,21 +79,19 @@ class OrderController extends Controller
     {
         $order = $request->all();
 
-        if (isset($order['date'])) {
-            $order['date'] = Carbon::createFromFormat('Y/m/d', $order['date'])->toDateString();
-        }
+    if (isset($order['date'])) {
+        // প্রথমে তারিখটিকে 'Y/m/d' ফরম্যাটে পার্স করা
+        $order['date'] = Carbon::createFromFormat('Y/m/d', $order['date'])->format('d F, Y');
+    }
 
-        if (isset($order['date'])) {
-            $order['date'] = Carbon::parse($order['date'])->format('d F, Y');
-        }
+    // মেইল পাঠানো
+    Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
-        Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Send order successfully.',
-            'data' => $order,
-        ], 201);
+    return response()->json([
+        'status' => true,
+        'message' => 'Send order successfully.',
+        'data' => $order,
+    ], 201);
 
     }
 
