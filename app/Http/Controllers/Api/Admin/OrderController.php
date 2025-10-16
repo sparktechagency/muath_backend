@@ -101,7 +101,9 @@ class OrderController extends Controller
     public function sendCustomOrder(Request $request)
 {
     $order = $request->all();
-    
+
+    $order['date'] = $order['date']->toDateString();
+
     Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
     return response()->json([
