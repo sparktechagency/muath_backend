@@ -102,7 +102,7 @@ class OrderController extends Controller
 {
     $order = $request->all();
 
-    $order['date'] = $order['date']->toDateString();
+    $order['date'] = $order['date']->format('d-m-Y');
 
     Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
