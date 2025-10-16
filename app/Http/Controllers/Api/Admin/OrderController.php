@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\SendCustomOrder;
 use App\Models\Metadata;
 use App\Models\Order;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -76,16 +77,20 @@ class OrderController extends Controller
 
     public function sendCustomOrder(Request $request)
     {
-            $order = $request->all();
+        $order = $request->all();
+        
+        if (isset($order['date'])) {
+            $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->toDateString();
+        }
 
-            Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
+        Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Send order successfully.',
-                'data' => $order,
-            ], 201);
-       
+        return response()->json([
+            'status' => true,
+            'message' => 'Send order successfully.',
+            'data' => $order,
+        ], 201);
+
     }
 
 }
