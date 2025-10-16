@@ -102,7 +102,11 @@ class OrderController extends Controller
 {
     $order = $request->all();
 
-    $order['date'] = $order['date']->format('d-m-Y');
+    $order = $request->all();
+
+    if (isset($order['date'])) {
+        $order['date'] = Carbon::createFromFormat('Y/m/d', $order['date'])->format('d F, Y');
+    }
 
     Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
