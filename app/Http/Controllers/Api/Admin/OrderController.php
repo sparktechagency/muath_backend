@@ -81,20 +81,40 @@ class OrderController extends Controller
 
         // return $request->date;
 
-    if (isset($order['date'])) {
-        // প্রথমে তারিখটিকে 'Y/m/d' ফরম্যাটে পার্স করা
-        $order['date'] = Carbon::createFromFormat('Y/m/d', $order['date'])->format('d F, Y');
+        if (isset($order['date'])) {
+            // প্রথমে তারিখটিকে 'Y/m/d' ফরম্যাটে পার্স করা
+            $order['date'] = Carbon::createFromFormat('Y/m/d', $order['date'])->format('d F, Y');
+        }
+
+        // মেইল পাঠানো
+        Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Send order successfully.',
+            'data' => $order,
+        ], 201);
+
     }
 
-    // মেইল পাঠানো
-    Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
-    return response()->json([
-        'status' => true,
-        'message' => 'Send order successfully.',
-        'data' => $order,
-    ], 201);
+    public function sendCustomOrder2(Request $request)
+    {
+        $order = $request->all();
 
+        $order = $request->all();
+
+        if (isset($order['date'])) {
+            $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->format('d F, Y');
+        }
+
+        Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Send order successfully.',
+            'data' => $order,
+        ], 201);
     }
 
 
@@ -102,12 +122,24 @@ class OrderController extends Controller
 {
     $order = $request->all();
 
-    $order = $request->all();
-
+    // date ফিল্ডটি যদি থাকে, সেটি সঠিক ফরম্যাটে কনভার্ট করা
     if (isset($order['date'])) {
-        $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->format('d F, Y');
+        // ইনপুট ডেটাকে পরিষ্কার করা (যেমন অতিরিক্ত স্পেস মুছে ফেলা)
+        $order['date'] = trim($order['date']);
+        
+        try {
+            // তারিখটিকে 'd/m/Y' ফরম্যাটে পার্স করা এবং 'd F, Y' ফরম্যাটে রূপান্তর করা
+            $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->format('d F, Y');
+        } catch (Exception $e) {
+            // যদি তারিখ পার্স না হয়, তাহলে ত্রুটি বার্তা দিন
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid date format. Please use d/m/Y format.',
+            ], 400);
+        }
     }
 
+    // মেইল পাঠানো
     Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
     return response()->json([
