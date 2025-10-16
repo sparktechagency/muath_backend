@@ -76,8 +76,8 @@
             <p><strong>Order Description:</strong> {{ $order['description'] }}</p>
         </div>
         <div class="footer">
-            <p>&copy; 2025 Your Company. All rights reserved.</p>
-            <p>If you have any questions, feel free to <a href="mailto:support@yourcompany.com">contact us</a>.</p>
+            <p>&copy; 2025 Muath Developer Team. All rights reserved.</p>
+            <p>If you have any questions, feel free to <a href="mailto:shifatghi@gmail.com">contact us</a>.</p>
         </div>
     </div>
 </body>
