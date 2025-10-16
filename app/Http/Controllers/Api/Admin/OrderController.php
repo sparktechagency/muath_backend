@@ -74,8 +74,6 @@ class OrderController extends Controller
             'order' => $order
         ]);
     }
-
-
     public function sendCustomOrder(Request $request)
     {
         $order = [
@@ -104,6 +102,4 @@ class OrderController extends Controller
             'data' => $order,
         ], 201);
     }
-
-
 }
