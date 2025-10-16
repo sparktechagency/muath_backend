@@ -91,6 +91,12 @@ class OrderController extends Controller
             'description' => $request->description,
         ];
 
+
+        if (isset($order['date'])) {
+
+            $order['date'] = Carbon::parse($order['date'])->toDateString(); // শুধু YYYY-MM-DD
+        }
+
         Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
         return response()->json([
