@@ -75,38 +75,21 @@ class OrderController extends Controller
         ]);
     }
 
-    public function sendCustomOrder1(Request $request)
+
+    public function sendCustomOrder(Request $request)
     {
-        $order = $request->all();
-
-        // return $request->date;
-
-        if (isset($order['date'])) {
-            // প্রথমে তারিখটিকে 'Y/m/d' ফরম্যাটে পার্স করা
-            $order['date'] = Carbon::createFromFormat('Y/m/d', $order['date'])->format('d F, Y');
-        }
-
-        // মেইল পাঠানো
-        Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Send order successfully.',
-            'data' => $order,
-        ], 201);
-
-    }
-
-
-    public function sendCustomOrder2(Request $request)
-    {
-        $order = $request->all();
-
-        $order = $request->all();
-
-        if (isset($order['date'])) {
-            $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->format('d F, Y');
-        }
+        $order = [
+            'full_name' => $request->full_name,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'address' => $request->address,
+            'city' => $request->city,
+            'state' => $request->state,
+            'zip_code' => $request->zip_code,
+            'country' => $request->country,
+            'date' => $request->date,
+            'description' => $request->description,
+        ];
 
         Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
 
@@ -116,79 +99,6 @@ class OrderController extends Controller
             'data' => $order,
         ], 201);
     }
-
-
-    public function sendCustomOrder3(Request $request)
-{
-    $order = $request->all();
-
-    // date ফিল্ডটি যদি থাকে, সেটি সঠিক ফরম্যাটে কনভার্ট করা
-    if (isset($order['date'])) {
-        // ইনপুট ডেটাকে পরিষ্কার করা (যেমন অতিরিক্ত স্পেস মুছে ফেলা)
-        $order['date'] = trim($order['date']);
-        
-        try {
-            // তারিখটিকে 'd/m/Y' ফরম্যাটে পার্স করা এবং 'd F, Y' ফরম্যাটে রূপান্তর করা
-            $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->format('d F, Y');
-        } catch (Exception $e) {
-            // যদি তারিখ পার্স না হয়, তাহলে ত্রুটি বার্তা দিন
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid date format. Please use d/m/Y format.',
-            ], 400);
-        }
-    }
-
-    // মেইল পাঠানো
-    Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
-
-    return response()->json([
-        'status' => true,
-        'message' => 'Send order successfully.',
-        'data' => $order,
-    ], 201);
-}
-
-
-
-public function sendCustomOrder(Request $request)
-{
-    $order = $request->all();
-
-    // date ফিল্ডটি যদি থাকে, সেটি সঠিক ফরম্যাটে কনভার্ট করা
-    if (isset($order['date'])) {
-        // ইনপুট ডেটাকে পরিষ্কার করা (যেমন অতিরিক্ত স্পেস মুছে ফেলা)
-        $order['date'] = trim($order['date']);
-        
-        // ডেটার ফরম্যাট চেক করুন
-        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $order['date'])) {
-            try {
-                // তারিখটিকে 'd/m/Y' ফরম্যাটে পার্স করা এবং 'd F, Y' ফরম্যাটে রূপান্তর করা
-                $order['date'] = Carbon::createFromFormat('d/m/Y', $order['date'])->format('d F, Y');
-            } catch (\Exception $e) {
-                // যদি তারিখ পার্স না হয়, তাহলে ত্রুটি বার্তা দিন
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Invalid date format. Please use d/m/Y format.',
-                ], 400);
-            }
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Date format should be d/m/Y (e.g., 31/10/2025).',
-            ], 400);
-        }
-    }
-
-    // মেইল পাঠানো
-    Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
-
-    return response()->json([
-        'status' => true,
-        'message' => 'Send order successfully.',
-        'data' => $order,
-    ], 201);
-}
 
 
 }
