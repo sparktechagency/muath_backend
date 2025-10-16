@@ -19,10 +19,10 @@
            
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            border: 1px solid #4CAF50; /* Added border */
+            border: 1px solid #6D9573; /* Added border */
         }
         .header {
-            background-color: #4CAF50;
+            background-color: #6D9573;
             color: white;
             padding: 15px;
             text-align: center;
@@ -35,7 +35,7 @@
             color: #333;
         }
         .content h3 {
-            color: #4CAF50;
+            color: #6D9573;
         }
         .footer {
             text-align: center;
@@ -44,7 +44,7 @@
             color: #777;
         }
         .footer a {
-            color: #4CAF50;
+            color: #6D9573;
             text-decoration: none;
         }
     </style>
