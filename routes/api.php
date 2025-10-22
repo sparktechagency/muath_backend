@@ -24,7 +24,7 @@ Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
-// Route::get('pages/{slug}', [StaticPageController::class, 'show']);
+Route::get('pages/{slug}', [StaticPageController::class, 'show']);
 
 Route::get('/get-banner', [BannerController::class, 'getBanner']);
 Route::get('/get-categories', [CategoryController::class, 'getCategories']);
@@ -71,7 +71,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/get-feedbacks', [SettingsController::class, 'getFeedbacks']);
     Route::get('/view-feedback/{id}', [SettingsController::class, 'viewFeedback']);
     Route::delete('/delete-feedback/{id}', [SettingsController::class, 'deleteFeedback']);
-    // Route::post('pages/{slug}', [StaticPageController::class, 'update']);
+    Route::post('pages/{slug}', [StaticPageController::class, 'update']);
   });
 
   Route::middleware('user')->prefix('user')->group(function () {
