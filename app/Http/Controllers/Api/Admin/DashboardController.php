@@ -23,7 +23,6 @@ class DashboardController extends Controller
                 'today_revenue' => '$' . Transaction::whereDate('payment_date', Carbon::now()->toDateString())->sum('amount'),
                 'orders' => Order::latest()->paginate($request->per_page ?? 10),
             ];
-
             return $this->sendResponse($data, 'Get basic info.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);

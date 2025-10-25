@@ -18,7 +18,6 @@ class OrderController extends Controller
     {
         $search = $request->input('search', '');
         $status = $request->input('status', '');
-
         $orders = Order::with('metadata')
             ->when($search, function ($query) use ($search) {
                 return $query->where('order_id', 'like', "%{$search}%")
@@ -32,7 +31,6 @@ class OrderController extends Controller
             })
             ->latest()
             ->get();
-
         return response()->json([
             'status' => true,
             'message' => 'Get orders',
@@ -42,11 +40,9 @@ class OrderController extends Controller
     public function viewOrder($id)
     {
         $order = Order::with(['order_items', 'metadata'])->where('id', $id)->first();
-
         if (!$order) {
             return response()->json(['error' => 'Order not found'], 404);
         }
-
         return response()->json([
             'status' => true,
             'message' => 'View order',
@@ -58,16 +54,12 @@ class OrderController extends Controller
         $request->validate([
             'status' => 'required|string|in:Pending,Completed'
         ]);
-
         $order = Order::where('id', $request->order_id)->first();
-
         if (!$order) {
             return response()->json(['error' => 'Order not found'], 404);
         }
-
         $order->status = $request->status;
         $order->save();
-
         return response()->json([
             'status' => true,
             'message' => 'Order status updated successfully',
@@ -88,14 +80,11 @@ class OrderController extends Controller
             'date' => $request->date,
             'description' => $request->description,
         ];
-
         if (isset($order['date'])) {
             $order['date'] = Carbon::parse($order['date'])->format('d F, Y');
             // $order['date'] = str_replace('October', 'Octobar', $order['date']);
         }
-
         Mail::to('shifatghi@gmail.com')->send(new SendCustomOrder($order));
-
         return response()->json([
             'status' => true,
             'message' => 'Send order successfully.',

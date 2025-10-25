@@ -97,7 +97,7 @@ class CloverController extends Controller
             ],
             "customer" => [
                 "email" => $request->email,
-                "firstName" =>$request->full_name,
+                "firstName" => $request->full_name,
                 "lastName" => ' ',
             ]
         ];
@@ -114,7 +114,7 @@ class CloverController extends Controller
         if (isset($data['checkoutSessionId'])) {
             Metadata::create([
                 'checkout_session_id' => $data['checkoutSessionId'],
-                'user_id' => rand(000000,999999),
+                'user_id' => rand(000000, 999999),
                 'email' => $request->email,
                 'full_name' => $request->full_name,
                 'address' => $request->address,

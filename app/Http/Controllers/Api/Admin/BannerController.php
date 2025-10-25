@@ -15,34 +15,27 @@ class BannerController extends Controller
         $validator = Validator::make($request->all(), [
             'banner' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:20480', // Image validation
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
                 'message' => $validator->errors()
             ], 422);
         }
-
         $data = Banner::find(1);
-
         if (!$data) {
             return response()->json([
                 'status' => false,
                 'message' => 'Banner not found'
             ], 404);
         }
-
         if ($request->hasFile('banner')) {
             if ($data->banner && Storage::disk('public')->exists(str_replace('/storage/', '', $data->banner))) {
                 Storage::disk('public')->delete(str_replace('/storage/', '', $data->banner));
             }
-
             $path = $request->banner->store('banners', 'public');
             $data->banner = '/storage/' . $path;
         }
-
         $data->save();
-
         return response()->json([
             'message' => 'Banner ' . ($data->wasRecentlyCreated ? 'created' : 'updated') . ' successfully',
             'banner' => $data

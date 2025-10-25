@@ -27,7 +27,6 @@ class StaticPageController extends Controller
             return $this->sendError($e->getMessage(), [], 500);
         }
     }
-
     public function update(StaticPageRequest $request, string $slug)
     {
         $page = StaticPage::bySlug($slug)->first();

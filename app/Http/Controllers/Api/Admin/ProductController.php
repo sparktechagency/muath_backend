@@ -27,21 +27,18 @@ class ProductController extends Controller
                 'additional_description' => 'nullable|string',
                 'is_offer' => 'nullable|boolean',
             ]);
-
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
                     'message' => $validator->errors()
                 ], 422);
             }
-
             $imagePaths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $imagePaths[] = '/storage/' . $image->store('products', 'public');
                 }
             }
-
             $product = Product::create([
                 'category' => $request->category,
                 'name' => $request->name,
@@ -50,14 +47,11 @@ class ProductController extends Controller
                 'images' => json_encode($imagePaths),
                 'additional_description' => $request->additional_description,
                 'is_offer' => $request->is_offer,
-
             ]);
-
             $packs = is_string($request->packs) ? json_decode($request->packs, true) : $request->packs;
             if (!is_array($packs)) {
                 return response()->json(['error' => 'Invalid packs format'], 400);
             }
-
             $pack_arr = [];
             foreach ($packs as $item) {
                 $packs = Pack::create([
@@ -68,9 +62,7 @@ class ProductController extends Controller
 
                 $pack_arr[] = $packs;
             }
-
             $product->packs = $pack_arr;
-
             return $this->sendResponse($product, 'Product added successfully.', true, 201);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
@@ -88,14 +80,11 @@ class ProductController extends Controller
                         ->orWhere('description', 'like', "%$search%");
                 });
             }
-
             if ($request->has('filter') && !empty($request->filter)) {
                 $filter = $request->filter;
                 $query->where('category', $filter);
             }
-
             $products = $query->latest()->paginate(10);
-
             // Process product images and packs
             foreach ($products as $product) {
                 $product->images = array_map(function ($image) {
@@ -104,7 +93,6 @@ class ProductController extends Controller
 
                 $product->packs = !empty($product->packs) ? json_decode($product->packs, true) : [];
             }
-
             return $this->sendResponse($products, 'Get products.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
@@ -124,18 +112,14 @@ class ProductController extends Controller
                 'additional_description' => 'nullable|string',
                 'is_offer' => 'nullable|boolean',
             ]);
-
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
                     'message' => $validator->errors()
                 ], 422);
             }
-
             $product = Product::findOrFail($id);
-
             $oldImages = json_decode($product->images, true);
-
             if ($request->hasFile('images')) {
                 foreach ($oldImages as $image) {
                     $imagePath = public_path($image);
@@ -143,32 +127,25 @@ class ProductController extends Controller
                         unlink($imagePath);
                     }
                 }
-
                 $imagePaths = [];
                 foreach ($request->file('images') as $image) {
                     $imagePaths[] = '/storage/' . $image->store('products', 'public');
                 }
                 $product->images = json_encode($imagePaths) ?? $product->images;
             }
-
             $product->category = $request->category ?? $product->category;
             $product->name = $request->name ?? $product->name;
             $product->price = $request->price ?? $product->price;
             $product->description = $request->description ?? $product->description;
             $product->additional_description = $request->additional_description ?? $product->additional_description;
             $product->is_offer = $request->is_offer ?? $product->is_offer;
-
             $product->save();
-
             if ($request->has('packs')) {
                 $product->packs()->delete();
-
                 $packs = is_string($request->packs) ? json_decode($request->packs, true) : $request->packs;
-
                 if (!is_array($packs)) {
                     return response()->json(['error' => 'Invalid packs format'], 400);
                 }
-
                 $pack_arr = [];
                 foreach ($packs as $item) {
                     $packs = Pack::create([
@@ -179,9 +156,7 @@ class ProductController extends Controller
                     $pack_arr[] = $packs;
                 }
             }
-
             $product->packs = $pack_arr;
-
             return $this->sendResponse($product, 'Product updated successfully.', true, 200);
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);
@@ -191,15 +166,12 @@ class ProductController extends Controller
     {
         try {
             $product = Product::with('packs')->find($id);
-
             if (!$product) {
                 return $this->sendError('Product not found!', []);
             }
-
             $product->images = array_map(function ($image) {
                 return asset($image);
             }, json_decode($product->images, true));
-
             return $this->sendResponse($product, 'View product.');
         } catch (Exception $e) {
             return $this->sendError('Something went wrong.', $e->getMessage(), 500);

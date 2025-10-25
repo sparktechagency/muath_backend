@@ -12,7 +12,6 @@ abstract class Controller
             'data' => $data
         ], $code);
     }
-
     public function sendError($error = 'Error', $errorMessages = [], $code = 500)
     {
         return response()->json([

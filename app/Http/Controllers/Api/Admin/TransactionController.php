@@ -14,7 +14,6 @@ class TransactionController extends Controller
     public function getTransactions(Request $request)
     {
         $search = $request->input('search', '');
-
         $transactions = Transaction::with('metadata')  // Ensure user relationship is loaded
             ->when($search, function ($query) use ($search) {
                 return $query->where('transaction_id', 'like', "%{$search}%")
@@ -25,7 +24,6 @@ class TransactionController extends Controller
             })
             ->latest()
             ->get();
-
         return response()->json([
             'status' => true,
             'message' => 'Get transactions',
